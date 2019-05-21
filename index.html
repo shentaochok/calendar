@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <title>在线排班管理</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <link rel="stylesheet" href="/static/public/layui/css/layui.css" media="all">
+        <link rel="stylesheet" href="/static/public/font-awesome/css/font-awesome.min.css" media="all" />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+
+            .dates {
+                overflow: hidden;
+            }
+
+            .table_container {
+                width: 904px;
+                overflow: hidden;
+                margin-left: 120px;
+            }
+
+            .table_cell_out {
+                width: 700px;
+                border: 2px solid #57abff;
+                float: left;
+                margin-top: 20px;
+                margin-bottom: 30px;
+            }
+
+            .table_cell {
+                width: 650px;
+                margin: 0 auto;
+                font-size: 18px;
+                margin-top: 20px;
+            }
+
+            .table_cell tr {
+                height: 60px;
+                display: table-row;
+                vertical-align: inherit;
+                border-color: inherit;
+            }
+
+            .table_cell tr:first-child {
+                height: 40px;
+            }
+
+            .table_cell tr td {
+                text-align: center;
+                cursor: pointer;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .table_cell tr:last-child td {
+                border: none;
+            }
+
+            .table_cell tr:first-child td {
+                color: #000;
+            }
+
+            .table_cell tr .table_on {
+                color: #fff;
+                background: #fb0;
+            }
+
+            .date_select {
+                width: 600px;
+                height: 40px;
+                margin-left: 140px;
+                margin-top: 30px;
+                text-align: center;
+            }
+
+            .date_select p {
+                display: inline-block;
+                color: #666;
+            }
+
+            .date_select span {
+                display: inline-block;
+                width: 40px;
+                height: 40px;
+                font-size: 24px;
+                line-height: 40px;
+                cursor: pointer;
+            }
+
+            .date_select .year {
+                width: auto;
+                padding-right: 6px;
+                color: #000;
+                cursor: initial;
+            }
+
+            .date_select .month {
+                width: auto;
+                padding-right: 6px;
+                color: #000;
+                cursor: initial;
+            }
+
+            .table_desc {
+                width: 200px;
+                height: 424px;
+                background: #57abff;
+                float: left;
+                margin-top: 20px;
+            }
+
+            .table_desc h2 {
+                font-size: 24px;
+                color: #fff;
+                text-align: center;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+
+            .table_desc p {
+                font-size: 16px;
+                padding-left: 20px;
+                color: #fff;
+                line-height: 30px;
+            }
+
+            .table_desc p span {
+                color: #fb0;
+                padding: 0 10px;
+            }
+
+            .rest span {
+                margin-right: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="dates">
+            <div class="date_select">
+                <p data-tag="year">
+                    <span class="date_prev">
+                        <</span> <span class="year">
+                    </span>年
+                    <span class="date_next">></span>
+                </p>
+                <p data-tag="month">
+                    <span class="date_prev">
+                        <</span> <span class="month">
+                    </span>月
+                    <span class="date_next">></span>
+                </p>
+            </div>
+            <div class="table_container">
+                <div class="table_cell_out">
+                    <table class="table_cell" border="0" cellspacing="0" cellpadding="0">
+                    </table>
+                </div>
+            </div>
+        </div>
+        <script>
+            function $_(name) {
+                return document.querySelectorAll(name);
+            }
+            function getCountDays(year, month) {
+                var date = new Date();
+                date.setFullYear(year),
+                    date.setMonth(month);
+                date.setDate(0);
+                return date.getDate();
+            }
+            var date = new Date();
+            var year = date.getFullYear();
+            var month = date.getMonth() + 1;
+            function initShow(year, month) {
+                var date = new Date();
+                date.setFullYear(year),
+                    date.setMonth(month - 1);
+                date.setDate(1);
+                var week = date.getDay();
+                $_(".year")[0].innerHTML = year;
+                $_(".month")[0].innerHTML = month;
+                createTable(year, month, week);
+            }
+            initShow(year, month);
+            function createTable(year, month, week) {
+                var html = "<tr class='week'><td>日</td><td>一</td><td>二</td><td>三</td><td>四</td><td>五</td><td>六</td></tr>";
+                var time = 0;
+                var countDays = getCountDays(year, month);
+                for (var i = 0; i < 6; i++) {
+                    html += "<tr>";
+                    for (var j = 0; j < 7; j++) {
+                        if (i == 0 && j < week || time >= countDays) {
+                            html += "<td></td>";
+                        }
+                        else {
+                            time++;
+                            html += "<td class='prevent' data-time=" + time + ">" + time  + "</td>";
+                        }
+                    }
+                    html += "</td>";
+                }
+                $_(".table_cell")[0].innerHTML = html;
+            }
+            var changeBtn = [...$_(".date_prev"), ...$_(".date_next")];
+            for (var i = 0; i < changeBtn.length; i++) {
+                changeBtn[i].onclick = function () {
+                    var nowYear = parseInt($_(".year")[0].innerHTML);
+                    var nowMonth = parseInt($_(".month")[0].innerHTML);
+                    if (this.className == "date_prev") {
+                        var tag = this.parentNode.getAttribute("data-tag");
+                        if (tag == "year") {
+                            initShow(nowYear - 1, nowMonth);
+                        }
+                        else {
+                            nowMonth = nowMonth - 1;
+                            if (nowMonth <= 0) {
+                                nowMonth = 12;
+                                nowYear = nowYear - 1;
+                            }
+                            initShow(nowYear, nowMonth);
+                        }
+                    }
+                    else {
+                        var tag = this.parentNode.getAttribute("data-tag");
+                        if (tag == "year") {
+                            initShow(nowYear + 1, nowMonth);
+                        }
+                        else {
+                            nowMonth = nowMonth + 1;
+                            if (nowMonth > 12) {
+                                nowMonth = nowMonth - 12;
+                                nowYear = nowYear + 1;
+                            }
+                            initShow(nowYear, nowMonth);
+                        }
+                    }
+                }
+            }
+        </script>
+    </body>
+
+</html>
